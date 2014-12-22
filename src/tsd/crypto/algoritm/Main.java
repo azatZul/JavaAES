@@ -1,6 +1,7 @@
 package tsd.crypto.algoritm;
 
 import java.io.UTFDataFormatException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 
 public class Main {
@@ -23,6 +24,8 @@ public class Main {
 			System.out.println("ђазмер текста в UTF-8: " + text.getBytes().length + " байт");
 			System.out.println("ђазмер ключа в UTF-8: " + k.getBytes().length+" байт");
 			byte[] enc = AES.encrypt(text.getBytes(), k.getBytes());
+			BigInteger[] sign=Sign.sign(enc);
+			byte[] hash=Hash.getHash(enc);
 			System.out.println("ифр: "+new String(enc));
 
 			byte[] dec = AES.decrypt(enc, k.getBytes());

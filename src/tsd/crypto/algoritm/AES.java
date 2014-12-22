@@ -1,5 +1,7 @@
 package tsd.crypto.algoritm;
 
+import java.util.Arrays;
+
 public class AES {
 
 	private static int Nb, Nk, Nr;
@@ -277,41 +279,47 @@ public class AES {
 
 		return tmp;
 	}
-	
 	public static byte[] encrypt(byte[] in,byte[] key){
 		
 		Nb = 4;
 		Nk = key.length/4;
 		Nr = Nk + 6;
 		
-		
 		int lenght=0;
 		byte[] padding = new byte[1];
 		int i;
 		//смотрим длину последнего блока
-		lenght = 16 - in.length % 16;				
-		padding = new byte[lenght];					
+		lenght = 16 - in.length % 16;
+		//length - оставшееся свободное место в блоке
+		padding = new byte[lenght];	
+		//оканчивается все на число 0x80
 		padding[0] = (byte) 0x80;
 		
 		for (i = 1; i < lenght; i++)				
 			padding[i] = 0;
-
+		//делаем новые данные
 		byte[] tmp = new byte[in.length + lenght];		
 		byte[] bloc = new byte[16];							
 		
-		
+		//генерируем раундовые ключи
 		w = generateSubkeys(key);
 		
 		int count = 0;
-
+		//начинаем кодировать исходные данные поблочно
 		for (i = 0; i < in.length + lenght; i++) {
+			//если мы на конце бока
 			if (i > 0 && i % 16 == 0) {
+				//кодируем его
 				bloc = encryptBloc(bloc);
+				
+				//заносим в результат
 				System.arraycopy(bloc, 0, tmp, i - 16, bloc.length);
 			}
+			//выделяем блок из исходных данных
 			if (i < in.length)
 				bloc[i % 16] = in[i];
-			else{														
+			else{
+				//или заполняем из присоединенного хвоста
 				bloc[i % 16] = padding[count % 16];
 				count++;
 			}
@@ -322,6 +330,12 @@ public class AES {
 		}
 		
 		return tmp;
+	}
+public static byte[] encryptBlockWithKey(byte[] in,byte[] key){
+									
+		//генерируем раундовые ключи
+		w = generateSubkeys(key);
+		return encryptBloc(in);
 	}
 	
 	public static byte[] decrypt(byte[] in,byte[] key){
